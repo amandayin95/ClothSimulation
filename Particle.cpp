@@ -20,13 +20,13 @@ Particle::~Particle(){
     
 }
 
-//Particle&	Particle::operator= (const Particle& particle){
-//     if (this != &particle) { // self-assignment check expected
-//         this->position = particle.position;
-//        // this->acceleration = particle.acceleration;
-//         this->velocity = particle.velocity;
-//         this->mass = particle.mass;
-//         this->force = particle.force;
-//     }
-//    return *this;
-//}
+Particle Particle::operator= (const Particle& particle){
+     if (this != &particle) { // self-assignment check expected
+         this->position = particle.position;
+         this->velocity = particle.velocity;
+         this->mass = particle.mass;
+         this->force = particle.force;
+         this->fixed = particle.fixed;
+     }
+    return *this;
+}

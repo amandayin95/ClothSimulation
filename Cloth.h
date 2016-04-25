@@ -32,7 +32,7 @@ public:
     int	getWidth ()   { return width;  }
     int	getHeight ()   { return height;  }
     Particle** getParticles()  {  return particles; }
-    Particle getParAt(int x, int y)  { return particles[x][y];  }
+    Particle& getParAt(int x, int y)  { return particles[x][y];  }
     Spring* getSheerSprings()  {  return sheer_springs;}
     Spring* getBendSprings()  {  return bend_springs;}
     Spring* getStructuralSprings()  {  return structural_springs;}
@@ -41,7 +41,7 @@ public:
     void setWidth (int w)   { width = w;  }
     void setHeight (int h)   { height = h;  }
     void setParticles(Particle** p)  { particles = p; }
-    void setParAt(int x, int y, Particle p)  { particles[x][y] = p;  }
+    void setParAt(int x, int y, Particle& p)  { particles[x][y] = p;  }
     void setSheerSprings(Spring* sheerS)  { sheer_springs = sheerS;}
     void setBendSprings(Spring* bendS)  {  bend_springs = bendS;}
     void setStructuralSprings(Spring* structuralS)  { structural_springs = structuralS;}

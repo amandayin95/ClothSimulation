@@ -25,7 +25,7 @@ int windowHeight=800;
 // viewing angles and zoom
 double phi = 0;
 double theta = 0;
-double camdy = 0;
+double camdy = 10;
 
 int dummy = 0;
 
@@ -33,17 +33,17 @@ int dummy = 0;
 Cloth my_cloth;
 int cloth_width = 20;
 int cloth_height = 20;
-double particle_mass = 1.0;
-double time_step = 0.1;
-Vector3d damp_factors = Vector3d(0,0,0);
-Vector3d spring_constants = Vector3d(0.8,0.8,0.8);
+double particle_mass = 0.5;
+double time_step = 0.01;
+Vector3d damp_factors = Vector3d(0.9,0.9,0.9);
+Vector3d spring_constants = Vector3d(0.1,0.1,0.1);
 
 void display();
 void init();
 void reshape(int width, int height);
 void drawCloth();
 void startMovement();
-void updateCloth();
+void updateCloth(int value);
 
 int main(int argc, char **argv)
 {
@@ -70,9 +70,8 @@ int main(int argc, char **argv)
     
     // initalize opengl parameters
     init();
-    
-    gluLookAt(25*sin(phi*3.14/180.0),10+camdy,25*cos(phi*3.14/180.0),
-              0,25*sin(theta*3.14/180.0)+camdy,0,
+    gluLookAt(25*sin(phi*3.14/180.0),camdy,150*cos(phi*3.14/180.0),
+              25*sin(phi*3.14/180.0),camdy,0,
               0,1,0);
     
     // loop until something happens
@@ -93,18 +92,7 @@ void init(){
     glClearStencil(0);
     
     // initialize parameters for cloth
-    Cloth newCloth = Cloth(cloth_width, cloth_height, particle_mass, damp_factors, spring_constants);
-    my_cloth.setWidth(newCloth.getWidth());
-    my_cloth.setHeight(newCloth.getHeight());
-    my_cloth.setParticles(newCloth.getParticles());
-    my_cloth.setBendSprings(newCloth.getBendSprings());
-    my_cloth.setSheerSprings(newCloth.getSheerSprings());
-    my_cloth.setStructuralSprings(newCloth.getStructuralSprings());
-    my_cloth.setMass(1);
-    printf(" cloth width  %d ", cloth_width);
-    printf("width is %d" , my_cloth.getWidth());
-    
-    
+    my_cloth = Cloth(cloth_width, cloth_height, particle_mass, damp_factors, spring_constants);
     
     glEnable(GL_DEPTH_TEST);
 }
@@ -126,17 +114,17 @@ void display(){
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    gluLookAt(25*sin(phi*3.14/180.0),20+camdy,40*cos(phi*3.14/180.0)+40,
-              5,25*sin(theta*3.14/180.0)+camdy+10,15,
+    gluLookAt(25*sin(phi*3.14/180.0),camdy,150*cos(phi*3.14/180.0),
+              25*sin(phi*3.14/180.0),camdy,0,
               0,1,0);
+
     
     drawCloth();
-    if (dummy == 0){
-        dummy++;
-        startMovement();  //TODO
-    }
     // swap buffers
     glutSwapBuffers();
+    
+
+    startMovement();
 }
 
 void drawCloth(){
@@ -168,20 +156,37 @@ void drawCloth(){
 
 void startMovement(){
     // change particles
-    my_cloth.getParAt(1, 0).setZ(1);
-    my_cloth.getParAt(5, 10).setZ(1);
-    my_cloth.getParAt(7, 8).setZ(1);
-    my_cloth.getParAt(19, 12).setZ(1);
     
-    while(true){
-        updateCloth();
-        glutPostRedisplay();
+    while(1){
+        //TODO Probably need the program to sleep. AKA execute at a lower speed
+        //glutTimerFunc(100, updateCloth, 0);
+        updateCloth(0);
+        
+        // clear buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        
+        // initialize modelview matrix
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        
+        gluLookAt(25*sin(phi*3.14/180.0),camdy,150*cos(phi*3.14/180.0),
+                  25*sin(phi*3.14/180.0),camdy,0,
+                  0,1,0);
+        
+        drawCloth();
+        glutSwapBuffers();
     }
-    
 }
 
-void updateCloth(){
-    Particle** p_copy = my_cloth.getParticles();
+void updateCloth(int value){
+    Particle** p_copy = new Particle*[cloth_width];
+    for (int i = 0; i < cloth_width; ++i){
+        p_copy[i] = new Particle[cloth_height];
+        for (int j = 0; j < cloth_height; ++j){
+            p_copy[i][j] = my_cloth.getParAt(i, j);
+        }
+    }
+    
     Vector3d** forces = new Vector3d*[cloth_width];
     for (int i = 0; i < cloth_width; ++i){
         forces[i] = new Vector3d[cloth_height];
@@ -189,7 +194,6 @@ void updateCloth(){
             forces[i][j] = Vector3d(0,0,0);
         }
     }
-    Vector3d gravity = Vector3d(0, -9.8, 0);
     
     // loop through structural springs, restlength = 1
     int springIndex = 2*(cloth_width-1)*(cloth_height-1) + (cloth_height + cloth_width - 2);
@@ -203,17 +207,62 @@ void updateCloth(){
         p2i = structSpringCopy[i].getP2i();
         p2j = structSpringCopy[i].getP2j();
         Vector3d springVector = Vector3d(p_copy[p1i][p1j].getPos(), p_copy[p2i][p2j].getPos());
-        forces[p1i][p1j] += (-1)*structK*(springVector.length() - 1)*(springVector.normalize());
+        Vector3d normSv = springVector;
+        normSv.normalize();
+        
+        forces[p1i][p1j] += (-1)*structK*(springVector.length() - 1)*(normSv);
         forces[p1i][p1j] += (-1)*dampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
         // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
-        forces[p2i][p2j] += structK*(springVector.length() - 1)*(springVector.normalize());
+        forces[p2i][p2j] += structK*(springVector.length() - 1)*(normSv);
         forces[p2i][p2j] += dampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
+    }
+    
+    springIndex = 2*(cloth_width-1)*(cloth_height-1);
+    Spring* sheerSpringCopy = my_cloth.getSheerSprings();
+    double sheerK = sheerSpringCopy[0].getSpringConst();
+    double sheerdampF = sheerSpringCopy[0].getDampFactor();
+    for (int i = 0; i < springIndex; ++i){
+        int p1i, p1j, p2i, p2j;
+        p1i = sheerSpringCopy[i].getP1i();
+        p1j = sheerSpringCopy[i].getP1j();
+        p2i = sheerSpringCopy[i].getP2i();
+        p2j = sheerSpringCopy[i].getP2j();
+        Vector3d springVector = Vector3d(p_copy[p1i][p1j].getPos(), p_copy[p2i][p2j].getPos());
+        Vector3d normSv = springVector;
+        normSv.normalize();
         
-        
+        forces[p1i][p1j] += (-1)*sheerK*(springVector.length() - sqrt(2))*(normSv);
+        forces[p1i][p1j] += (-1)*sheerdampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
+        // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
+        forces[p2i][p2j] += sheerK*(springVector.length() - sqrt(2))*(normSv);
+        forces[p2i][p2j] += sheerdampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
     }
     
     
+    springIndex = (cloth_width-2)*cloth_height + (cloth_height - 2)* cloth_width;
+    Spring* bendSpringCopy = my_cloth.getBendSprings();
+    double bendK = bendSpringCopy[0].getSpringConst();
+    double benddampF = bendSpringCopy[0].getDampFactor();
+    for (int i = 0; i < springIndex; ++i){
+        int p1i, p1j, p2i, p2j;
+        p1i = bendSpringCopy[i].getP1i();
+        p1j = bendSpringCopy[i].getP1j();
+        p2i = bendSpringCopy[i].getP2i();
+        p2j = bendSpringCopy[i].getP2j();
+        Vector3d springVector = Vector3d(p_copy[p1i][p1j].getPos(), p_copy[p2i][p2j].getPos());
+        Vector3d normSv = springVector;
+        normSv.normalize();
+        
+        forces[p1i][p1j] += (-1)*bendK*(springVector.length() - 2)*(normSv);
+        forces[p1i][p1j] += (-1)*benddampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
+        // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
+        forces[p2i][p2j] += bendK*(springVector.length() - 2)*(normSv);
+        forces[p2i][p2j] += benddampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
+    }
+    
     // add gravity
+    Vector3d gravity = Vector3d(0, -0.1, 0);
+    
     for(int i = 0; i < cloth_width; ++i){
         for (int j = 0; j < cloth_height; ++j){
             forces[i][j] += gravity*p_copy[i][j].getMass();
@@ -223,11 +272,15 @@ void updateCloth(){
     // get new position
     for(int i = 0; i < cloth_width; ++i){
         for (int j = 0; j < cloth_height; ++j){
-            Point3d newPos = p_copy[i][j].getPos()+p_copy[i][j].getVelocity()*time_step;
-            my_cloth.getParAt(i, j).setPos(newPos);
-            
-            Vector3d newVel = p_copy[i][j].getVelocity() + forces[i][j]/p_copy[i][j].getMass()*time_step;
-            my_cloth.getParAt(i, j).setVel(newVel);
+            if (!p_copy[i][j].getFixed()){
+                Point3d newPos = p_copy[i][j].getPos()+p_copy[i][j].getVelocity()*time_step;
+                my_cloth.getParAt(i, j).setPos(newPos);
+                
+                Vector3d newVel = p_copy[i][j].getVelocity() + forces[i][j]/p_copy[i][j].getMass()*time_step;
+                my_cloth.getParAt(i, j).setVel(newVel);
+                
+                my_cloth.getParAt(i, j).setForce(forces[i][j]);
+            }
         }
     }
 }

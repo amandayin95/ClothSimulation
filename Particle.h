@@ -24,7 +24,7 @@ public:
     // copy constructor and assignment operator
     // _deep_ copy!
 //    Particle (const Particle& particle);
-//    Particle&	operator= (const Particle& particle);
+    Particle	operator= (const Particle& particle);
     
     // accessors
     double	getX ()   { return position[0];   }
@@ -46,6 +46,7 @@ public:
     void    setVel(Vector3d newVel)      { velocity = newVel; }
     void    setMass (double newMass)     { mass = newMass; }
     void    setFixed(bool f)         { fixed = f;}
+    void    setForce(Vector3d newForce)  { force = newForce;}
   
     
 //    // OpenGL call wrappers ---- in case we need it
@@ -59,7 +60,6 @@ private:
     
     Point3d  position;
     Vector3d  velocity;
-   // Vector3d  acceleration;
     Vector3d  force;
     bool fixed;
     

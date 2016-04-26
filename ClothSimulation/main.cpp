@@ -31,11 +31,11 @@ int dummy = 0;
 
 // cloth object
 Cloth my_cloth;
-int cloth_width = 20;
-int cloth_height = 20;
-double particle_mass = 0.5;
-double time_step = 0.01;
-Vector3d damp_factors = Vector3d(0.9,0.9,0.9);
+int cloth_width = 10;
+int cloth_height = 10;
+double particle_mass = 0.1;
+double time_step = 0.02;
+Vector3d damp_factors = Vector3d(0.01,0.01,0.01);
 Vector3d spring_constants = Vector3d(0.1,0.1,0.1);
 
 void display();
@@ -128,9 +128,11 @@ void display(){
 }
 
 void drawCloth(){
+    static int count=0;
+    count++;
     for(int i = 0; i < cloth_width-1; ++i){
         for (int j = 0; j < cloth_height-1; ++j){
-            glPushMatrix();
+            
             glColor3f(1, 0, 0);
             glBegin(GL_TRIANGLES);
             Particle p1 = my_cloth.getParAt(i, j);
@@ -140,8 +142,7 @@ void drawCloth(){
             Particle p3 = my_cloth.getParAt(i, j+1);
             glVertex3f(p3.getX(), p3.getY(), p3.getZ());
             glEnd();
-            glPopMatrix();
-            glPushMatrix();
+            
             glColor3f(0, 0, 1);
             glBegin(GL_TRIANGLES);
             glVertex3f(p2.getX(), p2.getY(), p2.getZ());
@@ -149,7 +150,15 @@ void drawCloth(){
             Particle p4 = my_cloth.getParAt(i+1, j+1);
             glVertex3f(p4.getX(), p4.getY(), p4.getZ());
             glEnd();
-            glPopMatrix();
+            
+            
+            if (i == 5&& j ==5){
+                printf("particels center position x:%f, y:%f, z:%f \n", p1.getX(), p1.getY(), p1.getZ());
+                printf("p1 velocity %f, %f, %f \n", p1.getVelocity()[0], p1.getVelocity()[1], p1.getVelocity()[2] );
+                if (count==50)
+                    printf("here\n");
+            
+            }
         }
     }
 }
@@ -210,55 +219,55 @@ void updateCloth(int value){
         Vector3d normSv = springVector;
         normSv.normalize();
         
-        forces[p1i][p1j] += (-1)*structK*(springVector.length() - 1)*(normSv);
+        forces[p1i][p1j] += (1)*structK*(springVector.length() - 1)*(normSv);
         forces[p1i][p1j] += (-1)*dampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
         // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
-        forces[p2i][p2j] += structK*(springVector.length() - 1)*(normSv);
+        forces[p2i][p2j] += (-1)*structK*(springVector.length() - 1)*(normSv);
         forces[p2i][p2j] += dampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
     }
     
-    springIndex = 2*(cloth_width-1)*(cloth_height-1);
-    Spring* sheerSpringCopy = my_cloth.getSheerSprings();
-    double sheerK = sheerSpringCopy[0].getSpringConst();
-    double sheerdampF = sheerSpringCopy[0].getDampFactor();
-    for (int i = 0; i < springIndex; ++i){
-        int p1i, p1j, p2i, p2j;
-        p1i = sheerSpringCopy[i].getP1i();
-        p1j = sheerSpringCopy[i].getP1j();
-        p2i = sheerSpringCopy[i].getP2i();
-        p2j = sheerSpringCopy[i].getP2j();
-        Vector3d springVector = Vector3d(p_copy[p1i][p1j].getPos(), p_copy[p2i][p2j].getPos());
-        Vector3d normSv = springVector;
-        normSv.normalize();
-        
-        forces[p1i][p1j] += (-1)*sheerK*(springVector.length() - sqrt(2))*(normSv);
-        forces[p1i][p1j] += (-1)*sheerdampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
-        // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
-        forces[p2i][p2j] += sheerK*(springVector.length() - sqrt(2))*(normSv);
-        forces[p2i][p2j] += sheerdampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
-    }
-    
-    
-    springIndex = (cloth_width-2)*cloth_height + (cloth_height - 2)* cloth_width;
-    Spring* bendSpringCopy = my_cloth.getBendSprings();
-    double bendK = bendSpringCopy[0].getSpringConst();
-    double benddampF = bendSpringCopy[0].getDampFactor();
-    for (int i = 0; i < springIndex; ++i){
-        int p1i, p1j, p2i, p2j;
-        p1i = bendSpringCopy[i].getP1i();
-        p1j = bendSpringCopy[i].getP1j();
-        p2i = bendSpringCopy[i].getP2i();
-        p2j = bendSpringCopy[i].getP2j();
-        Vector3d springVector = Vector3d(p_copy[p1i][p1j].getPos(), p_copy[p2i][p2j].getPos());
-        Vector3d normSv = springVector;
-        normSv.normalize();
-        
-        forces[p1i][p1j] += (-1)*bendK*(springVector.length() - 2)*(normSv);
-        forces[p1i][p1j] += (-1)*benddampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
-        // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
-        forces[p2i][p2j] += bendK*(springVector.length() - 2)*(normSv);
-        forces[p2i][p2j] += benddampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
-    }
+//    springIndex = 2*(cloth_width-1)*(cloth_height-1);
+//    Spring* sheerSpringCopy = my_cloth.getSheerSprings();
+//    double sheerK = sheerSpringCopy[0].getSpringConst();
+//    double sheerdampF = sheerSpringCopy[0].getDampFactor();
+//    for (int i = 0; i < springIndex; ++i){
+//        int p1i, p1j, p2i, p2j;
+//        p1i = sheerSpringCopy[i].getP1i();
+//        p1j = sheerSpringCopy[i].getP1j();
+//        p2i = sheerSpringCopy[i].getP2i();
+//        p2j = sheerSpringCopy[i].getP2j();
+//        Vector3d springVector = Vector3d(p_copy[p1i][p1j].getPos(), p_copy[p2i][p2j].getPos());
+//        Vector3d normSv = springVector;
+//        normSv.normalize();
+//        
+//        forces[p1i][p1j] += (-1)*sheerK*(springVector.length() - sqrt(2))*(normSv);
+//        forces[p1i][p1j] += (-1)*sheerdampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
+//        // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
+//        forces[p2i][p2j] += sheerK*(springVector.length() - sqrt(2))*(normSv);
+//        forces[p2i][p2j] += sheerdampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
+//    }
+//    
+//    
+//    springIndex = (cloth_width-2)*cloth_height + (cloth_height - 2)* cloth_width;
+//    Spring* bendSpringCopy = my_cloth.getBendSprings();
+//    double bendK = bendSpringCopy[0].getSpringConst();
+//    double benddampF = bendSpringCopy[0].getDampFactor();
+//    for (int i = 0; i < springIndex; ++i){
+//        int p1i, p1j, p2i, p2j;
+//        p1i = bendSpringCopy[i].getP1i();
+//        p1j = bendSpringCopy[i].getP1j();
+//        p2i = bendSpringCopy[i].getP2i();
+//        p2j = bendSpringCopy[i].getP2j();
+//        Vector3d springVector = Vector3d(p_copy[p1i][p1j].getPos(), p_copy[p2i][p2j].getPos());
+//        Vector3d normSv = springVector;
+//        normSv.normalize();
+//        
+//        forces[p1i][p1j] += (-1)*bendK*(springVector.length() - 2)*(normSv);
+//        forces[p1i][p1j] += (-1)*benddampF*(p_copy[p1i][p1j].getVelocity() - p_copy[p2i][p2j].getVelocity() );
+//        // TODO TOOOOOOOODOOOOOOOOOO!!!!!!!!!!!!
+//        forces[p2i][p2j] += bendK*(springVector.length() - 2)*(normSv);
+//        forces[p2i][p2j] += benddampF*(p_copy[p1i][p1j].getVelocity()- p_copy[p2i][p2j].getVelocity());
+//    }
     
     // add gravity
     Vector3d gravity = Vector3d(0, -0.1, 0);

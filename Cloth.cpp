@@ -8,23 +8,27 @@
 
 #include "Cloth.h"
 
-Cloth::Cloth (int width, int height, double mass, Vector3d dampFactors, Vector3d sprConstants){
+Cloth::Cloth (int width, int height, double mass, Vector3d dampFactors, Vector3d sprConstants, double pacing){
     this->setWidth(width);
     this->setHeight(height);
     this->setMass(mass);
     double xCenter = 0;
     double yCenter = 0;
     double zCenter = 0;
-    double pacing = 1;
     particles = new Particle*[width];
     for (int i = 0; i < width; ++i){
         particles[i] = new Particle[height];
         particles[i][height-1] = Particle(xCenter+i*pacing, yCenter+(height-1)*pacing, zCenter);
         particles[i][height-1].setMass(mass);
         particles[i][height-1].setVel(Vector3d(0,0,0));
-        particles[i][height-1].setFixed(true);
+        particles[i][height-1].setFixed(false);
         
     }
+    particles[0][height-1].setFixed(true);
+    //particles[5][height-1].setFixed(true);
+    //particles[width-2][height-1].setFixed(true);
+    particles[width-1][height-1].setFixed(true);
+    
     
     for (int i = 0; i < width; ++i){
         for (int j = 0; j < height-1; ++j){

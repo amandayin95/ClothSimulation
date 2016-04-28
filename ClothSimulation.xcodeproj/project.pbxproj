@@ -15,6 +15,7 @@
 		7C690AC71CBA45CA005650D9 /* Spring.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C690AC51CBA45CA005650D9 /* Spring.cpp */; };
 		7C690AD21CBACD27005650D9 /* geometry.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7C690AD01CBACD27005650D9 /* geometry.cc */; };
 		7CEB239F1CBDAD5800700789 /* Cloth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CEB239D1CBDAD5800700789 /* Cloth.cpp */; };
+		7CF60B511CD174FF004158DA /* Control.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CF60B4F1CD174FF004158DA /* Control.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,6 +44,9 @@
 		7C690AD11CBACD27005650D9 /* geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
 		7CEB239D1CBDAD5800700789 /* Cloth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cloth.cpp; sourceTree = "<group>"; };
 		7CEB239E1CBDAD5800700789 /* Cloth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloth.h; sourceTree = "<group>"; };
+		7CF60B4F1CD174FF004158DA /* Control.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Control.cpp; sourceTree = "<group>"; };
+		7CF60B501CD174FF004158DA /* Control.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Control.hpp; sourceTree = "<group>"; };
+		7CF60B521CD175CB004158DA /* main.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = main.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +66,7 @@
 		7C690AA81CBA44FC005650D9 = {
 			isa = PBXGroup;
 			children = (
+				7CF60B4E1CD174D9004158DA /* Control */,
 				7C690AC11CBA4582005650D9 /* Models */,
 				7C690ABF1CBA4522005650D9 /* Cocoa.framework */,
 				7C690ABD1CBA451C005650D9 /* GLUT.framework */,
@@ -83,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				7C690AB41CBA44FC005650D9 /* main.cpp */,
+				7CF60B521CD175CB004158DA /* main.hpp */,
 			);
 			path = ClothSimulation;
 			sourceTree = "<group>";
@@ -100,6 +106,15 @@
 				7CEB239E1CBDAD5800700789 /* Cloth.h */,
 			);
 			name = Models;
+			sourceTree = "<group>";
+		};
+		7CF60B4E1CD174D9004158DA /* Control */ = {
+			isa = PBXGroup;
+			children = (
+				7CF60B4F1CD174FF004158DA /* Control.cpp */,
+				7CF60B501CD174FF004158DA /* Control.hpp */,
+			);
+			name = Control;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -163,6 +178,7 @@
 				7CEB239F1CBDAD5800700789 /* Cloth.cpp in Sources */,
 				7C690AC71CBA45CA005650D9 /* Spring.cpp in Sources */,
 				7C690AC41CBA45B8005650D9 /* Particle.cpp in Sources */,
+				7CF60B511CD174FF004158DA /* Control.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

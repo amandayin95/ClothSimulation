@@ -21,7 +21,7 @@ public:
     ~Cloth ();
     
     // create Cloths with specified characteristics
-    Cloth (int width, int height, double mass, Vector3d dampFactors, Vector3d sprConstants);
+    Cloth (int width, int height, double mass, Vector3d dampFactors, Vector3d sprConstants, double pacing);
     
     // copy constructor and assignment operator
     // _deep_ copy!
